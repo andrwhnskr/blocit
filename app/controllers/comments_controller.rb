@@ -1,5 +1,6 @@
 class CommentsController < ApplicationController
   respond_to :html, :js
+
   def create
     @post = Post.find( params[:post_id] )
     #@comments = @post.comments
@@ -8,14 +9,17 @@ class CommentsController < ApplicationController
     @comment.post = @post
     @new_comment = Comment.new
 
-    
+    authorize @comment
+
     if @comment.save
-      redirect_to [@post.topic, @post], notice: "Comment created successfully"
+      flash[:notice] = "Comment was created."
     else
-      flash[:error] = "Comment creation encountered an error"
-      redirect_to [@post.topic, @post]
+      flash[:error] = "There was an error saving the comment. Please try again."
     end
-    
+
+    respond_with(@comment) do |format|
+      format.html { redirect_to [@post.topic, @post] }
+    end
     # we need to redirect at the end back to post show
   end
 
